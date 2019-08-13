@@ -43,7 +43,9 @@ body{
       color: #fff
     }
 
-.student-list{}
+  .student-list{
+    
+  }
 
   .student-item{
     margin: 0 0 20px 0;
