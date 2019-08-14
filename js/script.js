@@ -51,18 +51,18 @@ const showPage = (page) => {
 
    //Displays no more than 10 students on page# per parameter
    for(i=startIndex; i<endIndex; i++) {
-      if(studentList[i]){
+      if(studentList[i]) {
       studentList[i].style.display = "block";
-   }
+      }
    };
 }
 
 /*** Create the `appendPageLinks function` 
 to generate, append, and add functionality to the pagination buttons.
 ***/
+const div = document.createElement('div');
+div.className = 'pagination';
 const appendPageLinks = (list) => {
-   const div = document.createElement('div');
-   div.className = 'pagination';
    const ul = document.createElement('ul');
    div.appendChild(ul);
    let numberOfPages = Math.ceil(list)/10;
@@ -82,7 +82,7 @@ const appendPageLinks = (list) => {
 appendPageLinks(studentList.length);
 
 
-/*** Create the `showSearch` and `displayResults` functions
+/*** Create the `showSearch` and `generateSearch` functions
 to dynamically load user search 
 */
 
@@ -106,9 +106,14 @@ const generateSearch = (input) => {
    if(!input) {
       showPage(1);
    }
-
-   //    removePageLinks()
-   //    appendPageLinks()
+   
+   const removePageLinks = () => {
+      let paginationDiv = document.querySelector('.pagination ul');
+      paginationDiv.parentNode.removeChild(paginationDiv);
+   }
+   removePageLinks();
+   appendPageLinks(studentArrayOfIndexes.length);
+   showPage(1);
 }
 
 //Search Bar Event Handler
@@ -120,8 +125,8 @@ search.addEventListener('keyup', (event) => {
 });
 
 //Pagination Event Handler
-const ul = document.querySelector('.pagination ul');
-ul.addEventListener('click', (event) => {
+const pagination = document.querySelector('.pagination');
+pagination.addEventListener('click', (event) => {
    const links = document.querySelectorAll('.pagination a');
    event.preventDefault();
    if(event.target.tagName === 'A') {   
