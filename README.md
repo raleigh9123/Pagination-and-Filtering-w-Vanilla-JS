@@ -2,7 +2,7 @@
  Project 2 - Pagination and Filtering
 
 --Description
-Project 2 provides a list of students on a page. This list of students flows into additional pages, accessable via links at the bottom of the page. Additionally, this project will attempt to include a filter, that searches for students and provides a dynamic number of page links depending on the number of students that match the search result.
+Project 2 provides a list of students on a page. This list of students displays only 10 students per page and flows into additional pages, accessable via pagination links at the bottom of the page. Additionally, this project includes a search filter, that searches for students and provides a dynamic number of page links depending on the number of students that match the search result.
 
 --Skills and Process
 Project 2 demonstrates use of event handlers, function scoping, and DOM manipulation/traversal. This includes creating elements in javascript and inserting those elements into the DOM as well as manipulating content within the current HTML to dynamically load content based on a search filter.

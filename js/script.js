@@ -17,8 +17,8 @@ const header = document.querySelector('h2');
 const pageListItems = 10;
 
 
-/*** Create the `appendSearch` function 
-to enable search students by name and return search results on page.
+/*** Create the `appendSearch` function.
+Creates input and button to allow users to search students by name and return search results on page.
 ***/
 const appendSearch = () => {
    const div = document.createElement('div');
@@ -37,9 +37,9 @@ const appendSearch = () => {
 appendSearch();
 
 /*** Create the `ShowPage` function 
-to hide all of the items in the list except for the ten you want to show.
+Hides all of the items in the list except up to ten matching results.
+`page` parameter is the # of the page (of 10 results) while the `loadList parameter takes all students from `studentList` or input generated list from `generatedStudents` array.
 ***/
-
 const showPage = (page, loadList) => {
    const startIndex = (page * pageListItems) - pageListItems;
    const endIndex = page * pageListItems;
@@ -49,19 +49,22 @@ const showPage = (page, loadList) => {
       studentList[i].style.display = "none";
    };
 
-   //Displays no more than 10 students on page# per parameter
+   //Displays no more than 10 students on page# per parameter `loadList`
    for(i=startIndex; i<endIndex; i++) {
       if(loadList[i]) {
          loadList[i].style.display = "block";
       }
    };
 }
+//Load initial page view.
+showPage(1, studentList);
 
 /*** Create the `appendPageLinks function` 
-to generate, append, and add functionality to the pagination buttons.
+Creates and appends pagination links depending on the number of items in total, or the number of items in the user generated `generatedStudents` array.
 ***/
 const div = document.createElement('div');
 div.className = 'pagination';
+
 const appendPageLinks = (list, searchGenerated) => {
    const ul = document.createElement('ul');
    div.appendChild(ul);
@@ -76,6 +79,7 @@ const appendPageLinks = (list, searchGenerated) => {
    }
    page.insertBefore(div, studentList.nextElementSibling);
 
+   //If search is user generated, add `userGenerated` class to the pagination items
    if(searchGenerated) {
       div.classList.add('userGenerated');
    }
@@ -93,7 +97,14 @@ to dynamically load user search
 */
 
 const generateSearch = (input) => {
+   //Remove error message if present.
+   let error = document.querySelector('.error');
+   if(input && error) {
+      error.parentNode.removeChild(error);
+   }
+   //Reset array on user input
    generatedStudents = [];
+   //Capture user input, compare to each student's name. If match, push to array
    for(i=0; i<studentList.length; i++) {
       let studentName = studentList[i].firstElementChild.firstElementChild.nextElementSibling.textContent;
       let student = studentList[i]
@@ -101,8 +112,8 @@ const generateSearch = (input) => {
          generatedStudents.push(student);
       }
    }
+   //If array is empty, provide error message
    if(generatedStudents.length === 0) {
-      
       for(i=0; i<studentList.length; i++) {
          studentList[i].style.display = "none";
       };
@@ -120,21 +131,25 @@ const generateSearch = (input) => {
       errorMessage();
    }
 
+   //Create new pagination links on user input
+   let paginationUl = document.querySelector('.pagination ul');
    let removePageLinks = () => {
-      let paginationDiv = document.querySelector('.pagination ul');
-      paginationDiv.parentNode.removeChild(paginationDiv);
+      paginationUl.parentNode.removeChild(paginationUl);
    }
    removePageLinks();
    appendPageLinks(generatedStudents.length, true);
 
+   //If input is empty, show the default page from `studentList`, otherwise, show the first page of user generated students from `generatedStudents`
    if(!input) {
       showPage(1, studentList);
+      let paginationDiv = document.querySelector('.pagination');
+      paginationDiv.classList.remove('userGenerated');
    } else {
       showPage(1, generatedStudents)
    }
 }
 
-//Search Bar Event Handler
+//Search Bar Event Handler. Add a 'click' event listener to the button and a 'keyup' listener to the input. Run function generateSearch() with the userinput as parameter
 const search = document.querySelector('.student-search');
 search.addEventListener('keyup', (event) => {
    const input = document.querySelector('input');
@@ -143,7 +158,6 @@ search.addEventListener('keyup', (event) => {
       generateSearch(userInput);
    }
 });
-
 search.addEventListener('click', (event) => {
    const input = document.querySelector('input');
    let userInput = input.value;
@@ -152,12 +166,12 @@ search.addEventListener('click', (event) => {
    }
 });
 
-//Pagination Event Handler
+//Pagination Event Handler. On click, prevent default link behavior. If pagination contains class 'userGenerated', show page numbers for user generated list `generatedStudents`, otherwise, show default pagination for all list items.
 const pagination = document.querySelector('.pagination');
 pagination.addEventListener('click', (event) => {
    const links = document.querySelectorAll('.pagination a');
    event.preventDefault();
-   if(event.target.tagName === 'A' && !event.target.parentNode.parentNode.parentNode.classList.contains('userGenerated')) {   
+   if(event.target.tagName === 'A' && !event.target.parentNode.parentNode.parentNode.classList.contains('userGenerated')) {
       for(i=0; i<links.length; i++) {
       links[i].className = '';
       }
@@ -173,6 +187,3 @@ pagination.addEventListener('click', (event) => {
          showPage(pageNumber, generatedStudents);
    }
 });
-
-//Load initial page view.
-showPage(1, studentList);
