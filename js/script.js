@@ -11,6 +11,7 @@ FSJS project 2 - List Filter and Pagination
 const page = document.querySelector('div.page');
 const studentUl = document.querySelector('.student-list');
 const studentList = studentUl.children;
+let generatedStudents = [];
 const pageHeader = document.querySelector('.page-header');
 const header = document.querySelector('h2');
 const pageListItems = 10;
@@ -39,10 +40,9 @@ appendSearch();
 to hide all of the items in the list except for the ten you want to show.
 ***/
 
-const showPage = (page) => {
+const showPage = (page, loadList) => {
    const startIndex = (page * pageListItems) - pageListItems;
    const endIndex = page * pageListItems;
-   studentList.length;
 
    //Hides all list items
    for(i=0; i<studentList.length; i++) {
@@ -51,8 +51,8 @@ const showPage = (page) => {
 
    //Displays no more than 10 students on page# per parameter
    for(i=startIndex; i<endIndex; i++) {
-      if(studentList[i]) {
-      studentList[i].style.display = "block";
+      if(loadList[i]) {
+         loadList[i].style.display = "block";
       }
    };
 }
@@ -62,7 +62,7 @@ to generate, append, and add functionality to the pagination buttons.
 ***/
 const div = document.createElement('div');
 div.className = 'pagination';
-const appendPageLinks = (list) => {
+const appendPageLinks = (list, searchGenerated) => {
    const ul = document.createElement('ul');
    div.appendChild(ul);
    let numberOfPages = Math.ceil(list)/10;
@@ -76,10 +76,16 @@ const appendPageLinks = (list) => {
    }
    page.insertBefore(div, studentList.nextElementSibling);
 
+   if(searchGenerated) {
+      div.classList.add('userGenerated');
+   }
+
    let firstListItem = document.querySelector('.pagination a');
-   firstListItem.className = 'active';
+   if(firstListItem) {
+      firstListItem.className = 'active';
+   }
 }
-appendPageLinks(studentList.length);
+appendPageLinks(studentList.length, false);
 
 
 /*** Create the `showSearch` and `generateSearch` functions
@@ -87,33 +93,45 @@ to dynamically load user search
 */
 
 const generateSearch = (input) => {
-   let studentArrayOfIndexes = [];
+   generatedStudents = [];
    for(i=0; i<studentList.length; i++) {
       let studentName = studentList[i].firstElementChild.firstElementChild.nextElementSibling.textContent;
+      let student = studentList[i]
       if(studentName.includes(input)) {
-         studentArrayOfIndexes.push(i);
+         generatedStudents.push(student);
       }
    }
-   //Hide all students
-   for(i=0; i<studentList.length; i++) {
-      studentList[i].style.display = "none";
-   };
-   //Display user Search of Students
-   for(i=0; i<studentArrayOfIndexes.length; i++) {
-      let index = studentArrayOfIndexes[i];
-      studentList[index].style.display="block";
-   };
-   if(!input) {
-      showPage(1);
+   if(generatedStudents.length === 0) {
+      
+      for(i=0; i<studentList.length; i++) {
+         studentList[i].style.display = "none";
+      };
+      const errorMessage = () => {
+         const div = document.createElement('div');
+         div.className = "error";
+         const h2 = document.createElement('h2');
+         const error = "No matching search results";
+         h2.textContent = error;
+         div.appendChild(h2);
+         if(!document.querySelector('.error')) {
+            page.insertBefore(div, studentList.nextElementSibling);
+         }
+      }
+      errorMessage();
    }
-   
-   const removePageLinks = () => {
+
+   let removePageLinks = () => {
       let paginationDiv = document.querySelector('.pagination ul');
       paginationDiv.parentNode.removeChild(paginationDiv);
    }
    removePageLinks();
-   appendPageLinks(studentArrayOfIndexes.length);
-   showPage(1);
+   appendPageLinks(generatedStudents.length, true);
+
+   if(!input) {
+      showPage(1, studentList);
+   } else {
+      showPage(1, generatedStudents)
+   }
 }
 
 //Search Bar Event Handler
@@ -121,7 +139,17 @@ const search = document.querySelector('.student-search');
 search.addEventListener('keyup', (event) => {
    const input = document.querySelector('input');
    let userInput = input.value;
-   generateSearch(userInput);
+   if (event.target.tagName === 'INPUT') {
+      generateSearch(userInput);
+   }
+});
+
+search.addEventListener('click', (event) => {
+   const input = document.querySelector('input');
+   let userInput = input.value;
+   if(event.target.tagName === 'BUTTON') {
+      generateSearch(userInput);
+   }
 });
 
 //Pagination Event Handler
@@ -129,15 +157,22 @@ const pagination = document.querySelector('.pagination');
 pagination.addEventListener('click', (event) => {
    const links = document.querySelectorAll('.pagination a');
    event.preventDefault();
-   if(event.target.tagName === 'A') {   
+   if(event.target.tagName === 'A' && !event.target.parentNode.parentNode.parentNode.classList.contains('userGenerated')) {   
       for(i=0; i<links.length; i++) {
-      links[i].className = 'testValue';
+      links[i].className = '';
       }
       event.target.className = 'active';
       const pageNumber = event.target.textContent;
-      showPage(pageNumber);
+      showPage(pageNumber, studentList);
+   } else if (event.target.tagName === 'A' && event.target.parentNode.parentNode.parentNode.classList.contains('userGenerated')) {
+      for(i=0; i<links.length; i++) {
+         links[i].className = '';
+         }
+         event.target.className = 'active';
+         const pageNumber = event.target.textContent;
+         showPage(pageNumber, generatedStudents);
    }
 });
 
 //Load initial page view.
-showPage(1);
+showPage(1, studentList);
